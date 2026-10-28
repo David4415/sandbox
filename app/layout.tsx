@@ -41,7 +41,7 @@ export default function RootLayout({
     >
       <body>
         <ClerkProvider appearance={{ theme: shadcn }}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider forcedTheme="dark">{children}</ThemeProvider>
         </ClerkProvider>
       </body>
     </html>
