@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
+import type { UIMessage } from "ai"
 import { and, desc, eq } from "drizzle-orm"
 
 import { db } from "@/lib/db"
@@ -20,10 +21,25 @@ export async function getGame(id: string) {
   if (!orgId) return null
 
   const [game] = await db
-    .select({ id: games.id, title: games.title })
+    .select({ id: games.id, title: games.title, messages: games.messages })
     .from(games)
     .where(and(eq(games.id, id), eq(games.orgId, orgId)))
     .limit(1)
 
   return game ?? null
+}
+
+export async function saveGameMessages({
+  id,
+  orgId,
+  messages,
+}: {
+  id: string
+  orgId: string
+  messages: UIMessage[]
+}) {
+  await db
+    .update(games)
+    .set({ messages })
+    .where(and(eq(games.id, id), eq(games.orgId, orgId)))
 }

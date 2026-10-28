@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport, type UIMessage } from "ai"
 
 import { ChatComposer } from "@/components/chat-composer"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
@@ -16,9 +17,23 @@ import {
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller"
 
-export function ChatThread() {
+export function ChatThread({
+  gameId,
+  initialMessages,
+}: {
+  gameId: string
+  initialMessages: UIMessage[]
+}) {
   const [input, setInput] = useState("")
-  const { messages, sendMessage } = useChat()
+  const { messages, sendMessage } = useChat({
+    id: gameId,
+    messages: initialMessages,
+    transport: new DefaultChatTransport({
+      prepareSendMessagesRequest: ({ id, messages }) => ({
+        body: { id, message: messages[messages.length - 1] },
+      }),
+    }),
+  })
 
   return (
     <div className="flex h-svh flex-col">

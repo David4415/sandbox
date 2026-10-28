@@ -11,5 +11,5 @@ export default async function Page({ params }: PageProps<"/games/[id]">) {
   const game = await getGame(id)
   if (!game) notFound()
 
-  return <ChatThread />
+  return <ChatThread gameId={game.id} initialMessages={game.messages} />
 }
