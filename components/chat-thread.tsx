@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport, type UIMessage } from "ai"
 
@@ -20,10 +21,14 @@ import {
 export function ChatThread({
   gameId,
   initialMessages,
+  initialPrompt,
 }: {
   gameId: string
   initialMessages: UIMessage[]
+  initialPrompt?: string
 }) {
+  const router = useRouter()
+  const promptSent = useRef(false)
   const [input, setInput] = useState("")
   const { messages, sendMessage } = useChat({
     id: gameId,
@@ -34,6 +39,13 @@ export function ChatThread({
       }),
     }),
   })
+
+  useEffect(() => {
+    if (!initialPrompt || promptSent.current) return
+    promptSent.current = true
+    sendMessage({ text: initialPrompt })
+    router.replace(`/games/${gameId}`)
+  }, [initialPrompt, sendMessage, router, gameId])
 
   return (
     <div className="flex h-svh flex-col">
