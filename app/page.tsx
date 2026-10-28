@@ -1,19 +1,30 @@
-import { Button } from "@/components/ui/button"
+import Image from "next/image"
+
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
+    <div className="flex min-h-svh bg-[#1c1b19] p-6">
+      <Empty className="gap-0">
+        <EmptyHeader className="max-w-3xl gap-6">
+          <EmptyMedia className="mb-6">
+            <Image src="/logo.svg" alt="Logo" width={96} height={96} priority />
+          </EmptyMedia>
+          <EmptyTitle className="text-4xl font-medium tracking-tight text-[#f3f2ee] sm:text-5xl">
+            What should we build today?
+          </EmptyTitle>
+          <EmptyDescription className="text-lg/relaxed text-[#b8b3a7] sm:text-xl/relaxed">
+            Build your own racers, shooters, puzzles and whole worlds using your
+            own words. If you can describe it, you can play it.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     </div>
   )
 }
