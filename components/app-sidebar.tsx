@@ -5,8 +5,18 @@ import { CoinsIcon, MessageSquareIcon, SquarePenIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState } from "react"
 
+import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription } from "@/components/ui/empty"
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +38,7 @@ export function AppSidebar({
   games: { id: string; title: string }[]
 }) {
   const pathname = usePathname()
+  const [open, setOpen] = useState(false)
 
   return (
     <Sidebar collapsible="icon">
@@ -71,17 +82,47 @@ export function AppSidebar({
               <SidebarMenu className="group-data-[collapsible=icon]:hidden">
                 {games.map((game) => (
                   <SidebarMenuItem key={game.id}>
-                    <SidebarMenuButton>{game.title}</SidebarMenuButton>
+                    <SidebarMenuButton
+                      isActive={pathname === `/games/${game.id}`}
+                      render={<Link href={`/games/${game.id}`} />}
+                    >
+                      {game.title}
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
             )}
             <SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <MessageSquareIcon />
-                  Recents
-                </SidebarMenuButton>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger render={<SidebarMenuButton />}>
+                    <MessageSquareIcon />
+                    Recents
+                  </PopoverTrigger>
+                  <PopoverContent side="right" align="start">
+                    <PopoverHeader>
+                      <PopoverTitle>Recents</PopoverTitle>
+                    </PopoverHeader>
+                    {games.length === 0 ? (
+                      <PopoverDescription>
+                        Your games will live here.
+                      </PopoverDescription>
+                    ) : (
+                      games.map((game) => (
+                        <Button
+                          key={game.id}
+                          variant="ghost"
+                          className="justify-start"
+                          nativeButton={false}
+                          onClick={() => setOpen(false)}
+                          render={<Link href={`/games/${game.id}`} />}
+                        >
+                          {game.title}
+                        </Button>
+                      ))
+                    )}
+                  </PopoverContent>
+                </Popover>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -98,17 +139,18 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
         <div className="flex items-center justify-between gap-2 px-2 group-data-[collapsible=icon]:px-0">
-          <OrganizationSwitcher
-            appearance={{
-              elements: {
-                rootBox:
-                  "w-full! max-w-full min-w-0 flex-1 group-data-[collapsible=icon]:hidden",
-                organizationSwitcherTrigger: "w-full min-w-0 max-w-full justify-between",
-                organizationPreviewTextContainer: "min-w-0",
-                organizationPreviewMainIdentifier: "truncate",
-              },
-            }}
-          />
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <OrganizationSwitcher
+              appearance={{
+                elements: {
+                  rootBox: "w-full! max-w-full min-w-0",
+                  organizationSwitcherTrigger: "w-full min-w-0 max-w-full justify-between",
+                  organizationPreviewTextContainer: "min-w-0",
+                  organizationPreviewMainIdentifier: "truncate",
+                },
+              }}
+            />
+          </div>
           <UserButton />
         </div>
       </SidebarFooter>
