@@ -7,3 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Database schema changes
+
+This project is in development and needs no backwards compatibility. Never use Drizzle migrations: do not run `drizzle-kit generate` or `drizzle-kit migrate`, and do not commit a `drizzle/` migrations folder. After editing `lib/db/schema.ts`, apply it with `npm run db:push`.
