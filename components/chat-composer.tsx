@@ -1,3 +1,5 @@
+"use client"
+
 import { ArrowUpIcon, ChevronDownIcon, GripIcon } from "lucide-react"
 
 import {
@@ -12,14 +14,36 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { createGame } from "@/lib/games/actions"
 
-export function ChatComposer() {
+export function ChatComposer({
+  value,
+  onValueChange,
+  onSubmit,
+  action,
+}: {
+  value: string
+  onValueChange: (value: string) => void
+  onSubmit?: () => void
+  action?: (formData: FormData) => void | Promise<void>
+}) {
   return (
-    <form action={createGame} className="contents">
+    <form
+      action={action}
+      onSubmit={
+        onSubmit
+          ? (event) => {
+              event.preventDefault()
+              onSubmit()
+            }
+          : undefined
+      }
+      className="contents"
+    >
       <InputGroup>
         <InputGroupTextarea
           name="title"
+          value={value}
+          onChange={(event) => onValueChange(event.target.value)}
           placeholder="Describe the game you want to build…"
         />
         <InputGroupAddon align="block-end">

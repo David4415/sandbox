@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import Image from "next/image"
 
 import { ChatComposer } from "@/components/chat-composer"
@@ -45,7 +48,13 @@ const messages = [
   },
 ]
 
+function sendMessage(text: string) {
+  console.log(text)
+}
+
 export function ChatThread() {
+  const [input, setInput] = useState("")
+
   return (
     <div className="flex h-svh flex-col">
       <MessageScrollerProvider defaultScrollPosition="end">
@@ -81,8 +90,17 @@ export function ChatThread() {
           <MessageScrollerButton />
         </MessageScroller>
       </MessageScrollerProvider>
-      <div className="mx-auto flex w-full mb-6 max-w-3xl flex-col px-6 pb-6">
-        <ChatComposer />
+      <div className="mx-auto mb-6 flex w-full max-w-3xl flex-col px-6 pb-6">
+        <ChatComposer
+          value={input}
+          onValueChange={setInput}
+          onSubmit={() => {
+            const text = input.trim()
+            if (!text) return
+            sendMessage(text)
+            setInput("")
+          }}
+        />
       </div>
     </div>
   )
