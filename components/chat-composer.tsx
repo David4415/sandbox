@@ -1,17 +1,5 @@
-import {
-  ArrowUpIcon,
-  CarIcon,
-  ChevronDownIcon,
-  CrosshairIcon,
-  GamepadIcon,
-  GripIcon,
-  PickaxeIcon,
-  PlaneIcon,
-  SwordsIcon,
-  ZapIcon,
-} from "lucide-react"
+import { ArrowUpIcon, ChevronDownIcon, GripIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,16 +13,6 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { createGame } from "@/lib/games/actions"
-
-const suggestions = [
-  { label: "Voxel survival", icon: PickaxeIcon },
-  { label: "Ink samurai duel", icon: SwordsIcon },
-  { label: "Comic-book firefight", icon: ZapIcon },
-  { label: "Realistic battlefield", icon: PlaneIcon },
-  { label: "Fight-first shooter", icon: CrosshairIcon },
-  { label: "Jungle expedition drive", icon: CarIcon },
-  { label: "Sunny kingdom platformer", icon: GamepadIcon },
-]
 
 export function ChatComposer() {
   return (
@@ -68,14 +46,6 @@ export function ChatComposer() {
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
-      <div className="flex flex-wrap justify-center gap-2">
-        {suggestions.map(({ label, icon: Icon }) => (
-          <Button key={label} variant="outline" className="rounded-full">
-            <Icon />
-            {label}
-          </Button>
-        ))}
-      </div>
     </form>
   )
 }

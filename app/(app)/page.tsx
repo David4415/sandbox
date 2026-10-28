@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server"
 import Image from "next/image"
 
 import { ChatComposer } from "@/components/chat-composer"
+import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -10,6 +11,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { suggestions } from "@/lib/games/suggestions"
 
 export default async function Page() {
   await auth.protect({unauthenticatedUrl:"/sign-in"})
@@ -31,6 +33,14 @@ export default async function Page() {
         </EmptyHeader>
         <EmptyContent className="mt-10 max-w-3xl gap-6">
           <ChatComposer />
+          <div className="flex flex-wrap justify-center gap-2">
+            {suggestions.map(({ label, icon: Icon }) => (
+              <Button key={label} variant="outline" className="rounded-full">
+                <Icon />
+                {label}
+              </Button>
+            ))}
+          </div>
         </EmptyContent>
       </Empty>
     </div>
