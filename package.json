@@ -14,6 +14,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.90",
     "@base-ui/react": "^1.9.0",
     "@clerk/nextjs": "^7.9.22",
     "@clerk/ui": "^1.42.1",
@@ -22,6 +23,7 @@
     "@neon/env": "^1.6.6",
     "@neondatabase/serverless": "^1.2.0",
     "@shadcn/react": "^0.3.1",
+    "ai": "^7.0.155",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "cn": "^0.5.0",
