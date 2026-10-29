@@ -50,7 +50,7 @@ export function ChatThread({
       startChatSession({ chatId, clientData }),
     sessions: initialSession ? { [id]: initialSession } : undefined,
   })
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, stop } = useChat({
     id,
     messages: initialMessages,
     transport,
@@ -117,6 +117,8 @@ export function ChatThread({
           value={value}
           onValueChange={setValue}
           onSubmit={handleSubmit}
+          isRunning={status === "submitted" || status === "streaming"}
+          onStop={stop}
         />
       </div>
     </div>

@@ -1,24 +1,21 @@
 import { anthropic } from "@ai-sdk/anthropic"
-import { chat, upsertIncomingMessage } from "@trigger.dev/sdk/ai"
+import { chat } from "@trigger.dev/sdk/ai"
 import { streamText } from "ai"
 
-import {
-  loadGameMessages,
-  saveGameMessages,
-  saveGameTurn,
-} from "@/lib/games/chat-store"
+import { saveGameTurn } from "@/lib/games/chat-store"
 
+// Trigger keeps the conversation history itself; the games row is a copy for
+// rendering the page, plus the session state a reopened tab needs to reconnect.
 export const gameChat = chat.agent({
   id: "game-chat",
-  // The game row is the source of truth for history.
-  hydrateMessages: async ({ chatId, trigger, incomingMessages }) => {
-    const stored = await loadGameMessages(chatId)
-
-    if (upsertIncomingMessage(stored, { trigger, incomingMessages })) {
-      await saveGameMessages(chatId, stored)
-    }
-
-    return stored
+  onTurnStart: async ({ chatId, uiMessages, chatAccessToken }) => {
+    // Saved before the answer streams, so a tab reopened mid-answer can resume.
+    chat.deferBeforeOutput(
+      saveGameTurn(chatId, {
+        messages: uiMessages,
+        publicAccessToken: chatAccessToken,
+      })
+    )
   },
   onTurnComplete: async ({
     chatId,

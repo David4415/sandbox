@@ -1,6 +1,11 @@
 "use client"
 
-import { ArrowUpIcon, ChevronDownIcon, GripIcon } from "lucide-react"
+import {
+  ArrowUpIcon,
+  ChevronDownIcon,
+  GripIcon,
+  SquareIcon,
+} from "lucide-react"
 
 import {
   DropdownMenu,
@@ -19,16 +24,24 @@ export function ChatComposer({
   value,
   onValueChange,
   onSubmit,
+  isRunning = false,
+  onStop,
 }: {
   value: string
   onValueChange: (value: string) => void
   onSubmit: (value: string) => void
+  isRunning?: boolean
+  onStop?: () => void
 }) {
   return (
     <form
       className="contents"
       onSubmit={(event) => {
         event.preventDefault()
+        if (isRunning) {
+          onStop?.()
+          return
+        }
         const text = value.trim()
         if (text) onSubmit(text)
       }}
@@ -58,9 +71,9 @@ export function ChatComposer({
             variant="default"
             size="icon-sm"
             className="ml-auto rounded-full"
-            aria-label="Send"
+            aria-label={isRunning ? "Stop" : "Send"}
           >
-            <ArrowUpIcon />
+            {isRunning ? <SquareIcon className="fill-current" /> : <ArrowUpIcon />}
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
