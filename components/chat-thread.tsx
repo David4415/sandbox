@@ -2,11 +2,17 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useChat } from "@ai-sdk/react"
-import { DefaultChatTransport, type UIMessage } from "ai"
+import { useTriggerChatTransport } from "@trigger.dev/sdk/chat/react"
+import type { UIMessage } from "ai"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 import { ChatComposer } from "@/components/chat-composer"
+import {
+  mintChatAccessToken,
+  startChatSession,
+} from "@/lib/games/chat-actions"
+import type { gameChat } from "@/trigger/chat"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
 import {
@@ -28,23 +34,27 @@ export function ChatThread({
   id,
   initialMessages,
   initialPrompt,
+  initialSession,
 }: {
   id: string
   initialMessages: UIMessage[]
   initialPrompt?: string
+  initialSession?: { publicAccessToken: string; lastEventId?: string }
 }) {
   const router = useRouter()
   const [value, setValue] = useState("")
+  const transport = useTriggerChatTransport<typeof gameChat>({
+    task: "game-chat",
+    accessToken: ({ chatId }) => mintChatAccessToken(chatId),
+    startSession: ({ chatId, clientData }) =>
+      startChatSession({ chatId, clientData }),
+    sessions: initialSession ? { [id]: initialSession } : undefined,
+  })
   const { messages, sendMessage, status } = useChat({
     id,
     messages: initialMessages,
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      // The server holds the thread; only send the new message.
-      prepareSendMessagesRequest: ({ id, messages }) => ({
-        body: { id, message: messages[messages.length - 1] },
-      }),
-    }),
+    transport,
+    resume: initialMessages.length > 0,
   })
 
   // Send the prompt from the new-game composer once, then drop it from the URL.

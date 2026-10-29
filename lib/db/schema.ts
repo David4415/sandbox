@@ -8,6 +8,9 @@ export const games = pgTable(
     orgId: text("org_id").notNull(),
     title: text("title").notNull(),
     messages: jsonb("messages").$type<UIMessage[]>().notNull().default([]),
+    // Trigger.dev chat session state, written with `messages` so a reload resumes from the right cursor.
+    publicAccessToken: text("public_access_token"),
+    lastEventId: text("last_event_id"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .notNull()

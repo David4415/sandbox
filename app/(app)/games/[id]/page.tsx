@@ -22,6 +22,14 @@ export default async function Page({
     <ChatThread
       id={game.id}
       initialMessages={game.messages}
+      initialSession={
+        game.publicAccessToken
+          ? {
+              publicAccessToken: game.publicAccessToken,
+              lastEventId: game.lastEventId ?? undefined,
+            }
+          : undefined
+      }
       initialPrompt={prompt}
     />
   )
