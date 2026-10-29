@@ -116,10 +116,10 @@ export function ChatThread({
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-svh flex-col overflow-hidden">
       <MessageScrollerProvider defaultScrollPosition="end">
         <MessageScroller className="h-auto flex-1">
-          <MessageScrollerViewport>
+          <MessageScrollerViewport className="scrollbar-none">
             <MessageScrollerContent className="mx-auto w-full max-w-3xl p-6">
               {messages.map((message) => (
                 <MessageScrollerItem key={message.id} messageId={message.id}>
@@ -160,7 +160,7 @@ export function ChatThread({
           <MessageScrollerButton />
         </MessageScroller>
       </MessageScrollerProvider>
-      <div className="mx-auto w-full max-w-3xl px-6 pb-6">
+      <div className="mx-auto w-full max-w-3xl shrink-0 px-6 pb-6">
         <ChatComposer
           value={value}
           onValueChange={setValue}

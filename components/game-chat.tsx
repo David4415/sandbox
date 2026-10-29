@@ -32,11 +32,11 @@ export function GameChat({
     />
   )
 
-  if (!hasSandbox) return <div className="h-svh">{thread}</div>
+  if (!hasSandbox) return <div className="h-svh overflow-hidden">{thread}</div>
 
   return (
-    <ResizablePanelGroup orientation="horizontal" className="h-svh">
-      <ResizablePanel defaultSize="40%" minSize="25%">
+    <ResizablePanelGroup orientation="horizontal" className="h-svh overflow-hidden">
+      <ResizablePanel defaultSize="40%" minSize="25%" className="overflow-hidden">
         {thread}
       </ResizablePanel>
       <ResizableHandle withHandle />

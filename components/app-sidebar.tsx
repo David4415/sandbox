@@ -5,7 +5,7 @@ import { CoinsIcon, MessageSquareIcon, SquarePenIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription } from "@/components/ui/empty"
@@ -39,6 +39,9 @@ export function AppSidebar({
 }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   return (
     <Sidebar collapsible="icon">
@@ -140,18 +143,20 @@ export function AppSidebar({
         </SidebarMenu>
         <div className="flex items-center justify-between gap-2 px-2 group-data-[collapsible=icon]:px-0">
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <OrganizationSwitcher
-              appearance={{
-                elements: {
-                  rootBox: "w-full! max-w-full min-w-0",
-                  organizationSwitcherTrigger: "w-full min-w-0 max-w-full justify-between",
-                  organizationPreviewTextContainer: "min-w-0",
-                  organizationPreviewMainIdentifier: "truncate",
-                },
-              }}
-            />
+            {mounted && (
+              <OrganizationSwitcher
+                appearance={{
+                  elements: {
+                    rootBox: "w-full! max-w-full min-w-0",
+                    organizationSwitcherTrigger: "w-full min-w-0 max-w-full justify-between",
+                    organizationPreviewTextContainer: "min-w-0",
+                    organizationPreviewMainIdentifier: "truncate",
+                  },
+                }}
+              />
+            )}
           </div>
-          <UserButton />
+          {mounted && <UserButton />}
         </div>
       </SidebarFooter>
     </Sidebar>

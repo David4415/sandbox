@@ -13,6 +13,11 @@ function ThemeProvider({
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
+      // React 19 warns about <script> rendered on the client; a non-JS type
+      // silences it there while the server-rendered script still runs.
+      scriptProps={{
+        type: typeof window === "undefined" ? undefined : "application/json",
+      }}
       {...props}
     >
       <ThemeHotkey />
