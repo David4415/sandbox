@@ -64,6 +64,34 @@ export function createGameTools(gameId: string) {
     (pending ??= getGameSandbox(gameId).then(({ sandbox }) => sandbox))
 
   return {
+    // No execute: the player answers in the chat UI, which supplies the output.
+    ask_player: tool({
+      description:
+        "Ask the player a multiple-choice question about an open design decision when their answer would change the game. First pick the dimension the question is about, then ask it with 2-4 options. Do not ask what you can reasonably decide yourself.",
+      inputSchema: z.object({
+        dimension: z
+          .enum(["loop", "goal", "world", "look", "feel", "controls", "challenge", "audio"])
+          .describe(
+            "Part of the game the question is about: loop (core actions repeated), goal (win/lose, progression), world (setting, level layout), look (art style, palette), feel (pacing, juice, camera), controls (input scheme), challenge (difficulty, enemies, hazards), audio (sound, music)"
+          ),
+        question: z.string().describe("The question to show the player"),
+        options: z
+          .array(
+            z.object({
+              id: z.string().describe("Short stable identifier"),
+              label: z.string().describe("Short choice text"),
+              description: z.string().optional().describe("What this choice means for the game"),
+            })
+          )
+          .min(2)
+          .max(4),
+      }),
+      outputSchema: z.object({
+        optionId: z.string().describe("Id of the chosen option"),
+        label: z.string().describe("Label of the chosen option"),
+      }),
+    }),
+
     write_file: tool({
       description:
         "Create a file or completely overwrite an existing one. Parent directories are created as needed.",

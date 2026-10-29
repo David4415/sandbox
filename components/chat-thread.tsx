@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import { useTriggerChatTransport } from "@trigger.dev/sdk/chat/react"
-import { getToolName, isToolUIPart, type UIMessage } from "ai"
+import {
+  getToolName,
+  isToolUIPart,
+  lastAssistantMessageIsCompleteWithToolCalls,
+  type InferUITools,
+  type UIMessage,
+} from "ai"
 import { CheckIcon, Loader2Icon, XIcon } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -13,10 +19,21 @@ import {
   mintChatAccessToken,
   startChatSession,
 } from "@/lib/games/chat-actions"
+import type { createGameTools } from "@/lib/games/tools"
 import type { gameChat } from "@/trigger/chat"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker"
 import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
+import {
+  Questionnaire,
+  QuestionnaireActions,
+  QuestionnaireChoice,
+  QuestionnaireChoiceDescription,
+  QuestionnaireChoices,
+  QuestionnaireItem,
+  QuestionnaireSubmit,
+  QuestionnaireTitle,
+} from "@/components/ui/questionnaire"
 import {
   MessageScroller,
   MessageScrollerButton,
@@ -27,6 +44,8 @@ import {
 } from "@/components/ui/message-scroller"
 
 type ToolPart = Extract<UIMessage["parts"][number], { toolCallId: string }>
+type AskPlayerTool = InferUITools<ReturnType<typeof createGameTools>>["ask_player"]
+type AskPlayerAnswer = AskPlayerTool["output"]
 
 const TOOL_LABELS: Record<string, string> = {
   write_file: "Writing file",
@@ -34,6 +53,7 @@ const TOOL_LABELS: Record<string, string> = {
   read_file: "Reading file",
   list_files: "Listing files",
   delete_files: "Deleting files",
+  ask_player: "Asking a question",
 }
 
 function getText(message: UIMessage) {
@@ -68,6 +88,65 @@ function ToolMarker({ part }: { part: ToolPart }) {
   )
 }
 
+// Human-in-the-loop: ask_player has no execute, so the player's pick is its output.
+function AskPlayer({
+  part,
+  onAnswer,
+}: {
+  part: ToolPart
+  onAnswer: (toolCallId: string, answer: AskPlayerAnswer) => void
+}) {
+  const input = part.input as AskPlayerTool["input"] | undefined
+
+  if (part.state === "input-available" && input) {
+    return (
+      <Questionnaire
+        onSubmit={(event) => {
+          event.preventDefault()
+          const optionId = new FormData(event.currentTarget).get("choice")
+          const option = input.options.find((o) => o.id === optionId)
+          if (option) onAnswer(part.toolCallId, { optionId: option.id, label: option.label })
+        }}
+      >
+        <QuestionnaireItem name="choice" required>
+          <QuestionnaireTitle>{input.question}</QuestionnaireTitle>
+          <QuestionnaireChoices>
+            {input.options.map((option) => (
+              <QuestionnaireChoice key={option.id} value={option.id}>
+                {option.label}
+                {option.description && (
+                  <QuestionnaireChoiceDescription>
+                    {option.description}
+                  </QuestionnaireChoiceDescription>
+                )}
+              </QuestionnaireChoice>
+            ))}
+          </QuestionnaireChoices>
+        </QuestionnaireItem>
+        <QuestionnaireActions>
+          <QuestionnaireSubmit>Send</QuestionnaireSubmit>
+        </QuestionnaireActions>
+      </Questionnaire>
+    )
+  }
+
+  if (part.state === "output-available") {
+    const answer = part.output as AskPlayerAnswer
+    return (
+      <Marker data-state="done">
+        <MarkerIcon>
+          <CheckIcon />
+        </MarkerIcon>
+        <MarkerContent>
+          {input?.question}: {answer.label}
+        </MarkerContent>
+      </Marker>
+    )
+  }
+
+  return <ToolMarker part={part} />
+}
+
 export function ChatThread({
   id,
   initialMessages,
@@ -90,11 +169,13 @@ export function ChatThread({
       startChatSession({ chatId, clientData }),
     sessions: initialSession ? { [id]: initialSession } : undefined,
   })
-  const { messages, sendMessage, status, stop } = useChat({
+  const { messages, sendMessage, addToolOutput, status, stop } = useChat({
     id,
     messages: initialMessages,
     transport,
     resume: initialMessages.length > 0,
+    // Continues the turn once every pending tool call (ask_player) has an answer.
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onFinish: () => onTurnFinish?.(),
   })
 
@@ -116,6 +197,10 @@ export function ChatThread({
     if (status !== "ready") return
     sendMessage({ text })
     setValue("")
+  }
+
+  function handleAnswer(toolCallId: string, output: AskPlayerAnswer) {
+    addToolOutput({ tool: "ask_player", toolCallId, output })
   }
 
   return (
@@ -141,6 +226,15 @@ export function ChatThread({
                             ) : null
                           }
                           if (isToolUIPart(part)) {
+                            if (getToolName(part) === "ask_player") {
+                              return (
+                                <AskPlayer
+                                  key={index}
+                                  part={part}
+                                  onAnswer={handleAnswer}
+                                />
+                              )
+                            }
                             return <ToolMarker key={index} part={part} />
                           }
                           return null
