@@ -1,1 +1,66 @@
-New game
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New game</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #ea580c;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      .welcome {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 9vh;
+        text-align: center;
+        color: #fff;
+        pointer-events: none;
+        padding: 0 24px;
+        text-shadow: 0 2px 12px rgba(120, 40, 0, 0.35);
+      }
+      .welcome h1 {
+        margin: 0 0 8px;
+        font-size: clamp(30px, 6vw, 52px);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .welcome p {
+        margin: 0;
+        font-size: clamp(14px, 2.2vw, 18px);
+        opacity: 0.9;
+      }
+      .welcome small {
+        display: block;
+        margin-top: 14px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.65;
+      }
+    </style>
+
+    <!-- Resolves `import "three"` and `import "three/addons/..."` for every module. -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="welcome">
+      <h1>Your game starts here</h1>
+      <p>Describe it in the chat and it will appear on this screen.</p>
+      <small>Click the cube</small>
+    </div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
