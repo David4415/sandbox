@@ -1,4 +1,4 @@
-import type { Sandbox } from "@daytona/sdk"
+import { DaytonaNotFoundError, type Sandbox } from "@daytona/sdk"
 import { eq } from "drizzle-orm"
 
 import { daytona } from "@/lib/daytona/client"
@@ -7,7 +7,7 @@ import { games } from "@/lib/db/schema"
 
 // Gives a game its own sandbox, seeded with a placeholder page, and records the
 // id on the game row. Worker-side like ../games/chat-store: no Clerk context.
-export async function createGameSandbox(gameId: string) {
+export async function createGameSandbox(gameId: string): Promise<{ sandbox: Sandbox }> {
   const sandbox = await daytona.create({ labels: { gameId } })
 
   await sandbox.fs.createFolder("/home/daytona/game", "755")
@@ -17,7 +17,31 @@ export async function createGameSandbox(gameId: string) {
   )
 
   await db.update(games).set({ sandboxId: sandbox.id }).where(eq(games.id, gameId))
-  return sandbox.id
+  return { sandbox }
+}
+
+// Always resolves to a started sandbox for the game, for chat tools that need
+// one: reuses the recorded sandbox (starting it if it was stopped) and only
+// creates a fresh one when the game has none or it no longer exists.
+export async function getGameSandbox(gameId: string): Promise<{ sandbox: Sandbox }> {
+  const [game] = await db
+    .select({ sandboxId: games.sandboxId })
+    .from(games)
+    .where(eq(games.id, gameId))
+    .limit(1)
+  if (!game) throw new Error(`Game ${gameId} not found`)
+
+  if (game.sandboxId) {
+    try {
+      const sandbox = await daytona.get(game.sandboxId)
+      if (sandbox.state !== "started") await sandbox.start()
+      return { sandbox }
+    } catch (error) {
+      if (!(error instanceof DaytonaNotFoundError)) throw error
+    }
+  }
+
+  return createGameSandbox(gameId)
 }
 
 const GAME_DIR = "/home/daytona/game"
