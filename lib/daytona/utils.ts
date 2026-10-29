@@ -44,7 +44,7 @@ export async function getGameSandbox(gameId: string): Promise<{ sandbox: Sandbox
   return createGameSandbox(gameId)
 }
 
-const GAME_DIR = "/home/daytona/game"
+export const GAME_DIR = "/home/daytona/game"
 export const GAME_PORT = 3000
 const SERVER_SESSION = "game-server"
 
