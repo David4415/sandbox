@@ -11,6 +11,8 @@ export const games = pgTable(
     // Trigger.dev chat session state, written with `messages` so a reload resumes from the right cursor.
     publicAccessToken: text("public_access_token"),
     lastEventId: text("last_event_id"),
+    // Daytona sandbox that holds this game's files.
+    sandboxId: text("sandbox_id"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .notNull()
