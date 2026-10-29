@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import { useTriggerChatTransport } from "@trigger.dev/sdk/chat/react"
-import type { UIMessage } from "ai"
+import { getToolName, isToolUIPart, type UIMessage } from "ai"
+import { CheckIcon, Loader2Icon, XIcon } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
@@ -14,6 +15,7 @@ import {
 } from "@/lib/games/chat-actions"
 import type { gameChat } from "@/trigger/chat"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
+import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker"
 import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
 import {
   MessageScroller,
@@ -24,10 +26,46 @@ import {
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller"
 
+type ToolPart = Extract<UIMessage["parts"][number], { toolCallId: string }>
+
+const TOOL_LABELS: Record<string, string> = {
+  write_file: "Writing file",
+  replace_text: "Editing file",
+  read_file: "Reading file",
+  list_files: "Listing files",
+  delete_files: "Deleting files",
+}
+
 function getText(message: UIMessage) {
   return message.parts
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("")
+}
+
+function ToolMarker({ part }: { part: ToolPart }) {
+  const name = getToolName(part)
+  const label = TOOL_LABELS[name] ?? name
+  const failed =
+    part.state === "output-error" || part.state === "output-denied"
+  const done = part.state === "output-available"
+
+  return (
+    <Marker data-state={failed ? "failed" : done ? "done" : "active"}>
+      <MarkerIcon>
+        {failed ? (
+          <XIcon className="text-destructive" />
+        ) : done ? (
+          <CheckIcon />
+        ) : (
+          <Loader2Icon className="animate-spin" />
+        )}
+      </MarkerIcon>
+      <MarkerContent className={failed ? "text-destructive" : undefined}>
+        {label}
+        {failed && part.state === "output-error" ? `: ${part.errorText}` : null}
+      </MarkerContent>
+    </Marker>
+  )
 }
 
 export function ChatThread({
@@ -91,9 +129,19 @@ export function ChatThread({
                         <Image src="/logo.svg" alt="" width={32} height={32} />
                       </MessageAvatar>
                       <MessageContent>
-                        <Bubble variant="ghost">
-                          <BubbleContent>{getText(message)}</BubbleContent>
-                        </Bubble>
+                        {message.parts.map((part, index) => {
+                          if (part.type === "text") {
+                            return part.text ? (
+                              <Bubble key={index} variant="ghost">
+                                <BubbleContent>{part.text}</BubbleContent>
+                              </Bubble>
+                            ) : null
+                          }
+                          if (isToolUIPart(part)) {
+                            return <ToolMarker key={index} part={part} />
+                          }
+                          return null
+                        })}
                       </MessageContent>
                     </Message>
                   ) : (
