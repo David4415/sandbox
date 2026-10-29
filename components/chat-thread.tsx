@@ -78,7 +78,7 @@ export function ChatThread({
   }
 
   return (
-    <div className="flex h-svh flex-col">
+    <div className="flex h-full flex-col">
       <MessageScrollerProvider defaultScrollPosition="end">
         <MessageScroller className="h-auto flex-1">
           <MessageScrollerViewport>
