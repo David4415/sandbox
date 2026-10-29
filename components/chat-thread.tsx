@@ -73,11 +73,13 @@ export function ChatThread({
   initialMessages,
   initialPrompt,
   initialSession,
+  onTurnFinish,
 }: {
   id: string
   initialMessages: UIMessage[]
   initialPrompt?: string
   initialSession?: { publicAccessToken: string; lastEventId?: string }
+  onTurnFinish?: () => void
 }) {
   const router = useRouter()
   const [value, setValue] = useState("")
@@ -93,6 +95,7 @@ export function ChatThread({
     messages: initialMessages,
     transport,
     resume: initialMessages.length > 0,
+    onFinish: () => onTurnFinish?.(),
   })
 
   // Send the prompt from the new-game composer once, then drop it from the URL.

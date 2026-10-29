@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react"
 
-export function ChatPreview({ gameId }: { gameId: string }) {
+export function ChatPreview({
+  gameId,
+  revision,
+}: {
+  gameId: string
+  revision: number
+}) {
   const [url, setUrl] = useState<string>()
   const [error, setError] = useState<string>()
 
@@ -23,5 +29,13 @@ export function ChatPreview({ gameId }: { gameId: string }) {
   if (error) return <p className="p-4 text-sm text-destructive">{error}</p>
   if (!url) return <p className="p-4 text-sm text-muted-foreground">Loading preview…</p>
 
-  return <iframe src={url} title="Game preview" className="size-full border-0" />
+  // The URL stays the same across edits, so a new key remounts the iframe to reload it.
+  return (
+    <iframe
+      key={revision}
+      src={url}
+      title="Game preview"
+      className="size-full border-0"
+    />
+  )
 }
